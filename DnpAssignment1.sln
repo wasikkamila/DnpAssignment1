@@ -4,6 +4,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{BCE1FB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entities", "Entities\Entities.csproj", "{E444ACDC-CE13-42F1-BD5D-8EF3487F636B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{52B4B148-E596-4B99-AA0A-CC336E5DE3B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary1", "ClassLibrary1\ClassLibrary1.csproj", "{0B4DACB4-D675-42C2-97BB-412075855BEA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepositoryContracts", "RepositoryContracts\RepositoryContracts.csproj", "{ED38207F-64D3-45CC-8485-760CA835E603}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -11,11 +17,21 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{E444ACDC-CE13-42F1-BD5D-8EF3487F636B} = {BCE1FBE6-B370-4051-B84C-10F1928448F4}
+		{0B4DACB4-D675-42C2-97BB-412075855BEA} = {52B4B148-E596-4B99-AA0A-CC336E5DE3B0}
+		{ED38207F-64D3-45CC-8485-760CA835E603} = {BCE1FBE6-B370-4051-B84C-10F1928448F4}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{E444ACDC-CE13-42F1-BD5D-8EF3487F636B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E444ACDC-CE13-42F1-BD5D-8EF3487F636B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E444ACDC-CE13-42F1-BD5D-8EF3487F636B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E444ACDC-CE13-42F1-BD5D-8EF3487F636B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B4DACB4-D675-42C2-97BB-412075855BEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B4DACB4-D675-42C2-97BB-412075855BEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B4DACB4-D675-42C2-97BB-412075855BEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B4DACB4-D675-42C2-97BB-412075855BEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED38207F-64D3-45CC-8485-760CA835E603}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED38207F-64D3-45CC-8485-760CA835E603}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED38207F-64D3-45CC-8485-760CA835E603}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED38207F-64D3-45CC-8485-760CA835E603}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
