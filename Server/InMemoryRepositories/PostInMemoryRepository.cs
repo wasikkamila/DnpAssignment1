@@ -10,9 +10,10 @@ public class PostInMemoryRepository : IPostRepository
     public PostInMemoryRepository()
     {
         posts = new List<Post>();
-        
+    
         posts.Add(new Post {Id = 1, Title = "Welcome", Body = "Welcome to the forum!", UserId = 1});
         posts.Add(new Post {Id = 2, Title = "Post", Body = "Another post", UserId = 2});
+        posts.Add(new Post {Id = 3, Title = "Third post", Body = "Yet another post", UserId = 3});
     }
     
     public Task<Post> AddAsync(Post post)
