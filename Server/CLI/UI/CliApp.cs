@@ -1,6 +1,6 @@
 ﻿using RepositoryContracts;
 using CLI.ManageUsers;
-using CLI.ManagePosts;
+using CLI.UI.ManagePosts;
 
 namespace CLI;
 
@@ -12,7 +12,7 @@ public class CliApp
     public CliApp(IUserRepository userRepository, IPostRepository postRepository, ICommentRepository commentRepository)
     {
         _manageUsersView = new ManageUsersView(userRepository);
-        _managePostsView = new ManagePostsView(postRepository, commentRepository);
+        _managePostsView = new ManagePostsView(postRepository, commentRepository, userRepository);
     }
 
     public async Task RunAsync()
