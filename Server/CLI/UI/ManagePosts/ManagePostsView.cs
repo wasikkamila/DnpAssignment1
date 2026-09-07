@@ -32,7 +32,7 @@ public class ManagePostsView
         {
             case "1": await createPostView.CreatePostAsync(); 
                 break;
-            case "2": await listPostsView.ListPostsViewAsync();
+            case "2": listPostsView.ListPosts();
                 break;
             case "3": await singlePostView.ShowSingleAsync();
                 break;
