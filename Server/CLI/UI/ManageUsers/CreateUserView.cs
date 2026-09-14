@@ -17,6 +17,19 @@ public class CreateUserView
         Console.WriteLine("--- Create New User ---");
         Console.Write("Username: ");
         string userName = Console.ReadLine() ?? "";
+
+        if (string.IsNullOrWhiteSpace(userName))
+        {
+            Console.WriteLine("Username cannot be empty.");
+            return;
+        }
+
+        if (_userRepository.GetMany().Any(u => u.UserName == userName))
+        {
+            Console.WriteLine($"Username '{userName}' is already taken.");
+            return;
+        }
+
         Console.Write("Password: ");
         string password = Console.ReadLine() ?? "";
 
