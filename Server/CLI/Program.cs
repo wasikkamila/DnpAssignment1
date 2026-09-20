@@ -2,10 +2,11 @@
 using RepositoryContracts;
 using InMemoryRepositories;
 using CLI;
+using FileRepositories;
 
-IUserRepository userRepository = new UserInMemoryRepository();
-IPostRepository postRepository = new PostInMemoryRepository();
-ICommentRepository commentRepository = new CommentInMemoryRepository();
+IUserRepository userRepository = new UserFileRepository();
+IPostRepository postRepository = new PostFileRepository();
+ICommentRepository commentRepository = new CommentFileRepository();
 
 CliApp app = new CliApp(userRepository, postRepository, commentRepository);
 await app.RunAsync();
