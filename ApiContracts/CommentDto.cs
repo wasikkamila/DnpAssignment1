@@ -1,12 +1,10 @@
 ﻿namespace ApiContracts;
 
-public class PostDto
+public class CommentDto
 {
     public required int Id { get; set; }
-    public required string Title { get; set; }
     public required string Body { get; set; }
     public required int UserId { get; set; }
     public required string UserName { get; set; }
-    
-    public List<CommentDto>? Comments { get; set; }
+    public required int PostId { get; set; }
 }

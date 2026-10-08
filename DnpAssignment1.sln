@@ -14,7 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{1DACA6
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo", "Server\Demo\Demo.csproj", "{095B292D-6266-4BD3-9A95-58589B4C7DBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication", "Server\WebApplication\WebApplication.csproj", "{D9B2F47A-7006-479C-A060-E32CD738CDAD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI", "Server\WebAPI\WebAPI.csproj", "{D9B2F47A-7006-479C-A060-E32CD738CDAD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiContracts", "ApiContracts\ApiContracts.csproj", "{9A070759-CA5B-4B1C-AF42-28A8248BFABB}"
 EndProject
