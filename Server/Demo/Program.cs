@@ -1,12 +1,11 @@
 ﻿using Entities;
-using InMemoryRepositories;
-using RepositoryContracts;
+using FileRepositories;
 using RepositoryContracts;
 
 
 //users
 Console.WriteLine("USERS:");
-IUserRepository userRepository = new UserInMemoryRepository();
+IUserRepository userRepository = new UserFileRepository();
 PrintUsers(userRepository.GetMany());
 
 User addedUser = await userRepository.AddAsync(new User {UserName = "kamila", Password = "password"});
@@ -26,7 +25,7 @@ PrintUsers(userRepository.GetMany());
 //posts
 Console.WriteLine();
 Console.WriteLine("POSTS:");
-IPostRepository postRepository = new PostInMemoryRepository();
+IPostRepository postRepository = new PostFileRepository();
 PrintPosts(postRepository.GetMany());
 
 Post addedPost = await postRepository.AddAsync(new Post{ Title = "New post", Body = "Body text", UserId = 1 });
@@ -46,7 +45,7 @@ PrintPosts(postRepository.GetMany());
 //comments
 Console.WriteLine();
 Console.WriteLine("COMMENTS:");
-ICommentRepository commentRepository = new CommentInMemoryRepository();
+ICommentRepository commentRepository = new CommentFileRepository();
 PrintComments(commentRepository.GetMany());
 
 Comment addedComment = await commentRepository.AddAsync(new Comment{Body = "new comment", UserId = 1, PostId = 1});
@@ -54,6 +53,7 @@ Console.WriteLine($"new comment: Id: {addedComment.Id}, Body: {addedComment.Body
 
 Comment fetchedComment = await commentRepository.GetSingleAsync(addedComment.Id);
 fetchedComment.Body = "updated comment";
+await commentRepository.UpdateAsync(fetchedComment);
 
 Comment updatedComment = await commentRepository.GetSingleAsync(addedComment.Id);
 Console.WriteLine($"comment updated: {updatedComment.Body}");
