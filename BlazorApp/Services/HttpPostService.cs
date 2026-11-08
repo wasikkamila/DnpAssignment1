@@ -38,7 +38,7 @@ public class HttpPostService : IPostService
 
     public async Task<PostDto> GetPostAsync(int id, bool includeComments)
     {
-        HttpResponseMessage httpResponse = await client.GetAsync($"posts/{id}");
+        HttpResponseMessage httpResponse = await    client.GetAsync($"posts/{id}?includeComments={includeComments.ToString().ToLowerInvariant()}");
         string response = await httpResponse.Content.ReadAsStringAsync();
         if (!httpResponse.IsSuccessStatusCode)
         {

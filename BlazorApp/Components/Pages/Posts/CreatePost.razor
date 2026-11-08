@@ -1,0 +1,67 @@
+﻿@page "/posts/create"
+@attribute [Authorize]
+@inject IPostService PostService
+@inject NavigationManager Nav
+
+<PageTitle>New post</PageTitle>
+
+<h1>New post</h1>
+
+<div style="max-width: 600px">
+    <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input class="form-control" @bind="title" @bind:event="oninput" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Body</label>
+        <textarea class="form-control" rows="6" @bind="body" @bind:event="oninput"></textarea>
+    </div>
+
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <p class="text-danger">@error</p>
+    }
+
+    <button class="btn btn-primary" @onclick="SubmitAsync">Create post</button>
+</div>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? State { get; set; }
+
+    private string title = "";
+    private string body = "";
+    private string? error;
+
+    private async Task SubmitAsync()
+    {
+        error = null;
+
+        if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(body))
+        {
+            error = "Title and body are required.";
+            return;
+        }
+
+        int? userId = State is null ? null : (await State).User.GetUserId();
+        if (userId is null)
+        {
+            error = "You must be logged in to post.";
+            return;
+        }
+
+        try
+        {
+            PostDto created = await PostService.AddPostAsync(new CreatePostDto
+            {
+                Title = title,
+                Body = body,
+                UserId = userId.Value
+            });
+            Nav.NavigateTo($"/posts/{created.Id}");
+        }
+        catch (Exception e)
+        {
+            error = e.Message;
+        }
+    }
+}

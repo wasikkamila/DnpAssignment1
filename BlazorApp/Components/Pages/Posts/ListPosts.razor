@@ -1,0 +1,63 @@
+﻿@page "/posts"
+@inject IPostService PostService
+
+<PageTitle>Posts</PageTitle>
+
+<h1>Posts</h1>
+
+<AuthorizeView>
+    <Authorized>
+        <a class="btn btn-primary mb-3" href="/posts/create">New post</a>
+    </Authorized>
+</AuthorizeView>
+
+<div class="input-group mb-3" style="max-width: 420px">
+    <input class="form-control" placeholder="Search by title" @bind="titleFilter" @bind:event="oninput" />
+    <button class="btn btn-outline-secondary" @onclick="LoadAsync">Search</button>
+</div>
+
+@if (error is not null)
+{
+    <p class="text-danger">@error</p>
+}
+else if (posts is null)
+{
+    <p>Loading...</p>
+}
+else if (posts.Count == 0)
+{
+    <p>No posts found.</p>
+}
+else
+{
+    <ul class="list-unstyled">
+        @foreach (PostDto post in posts)
+        {
+            <li class="mb-2">
+                <a href="/posts/@post.Id">@post.Title</a>
+                <span class="text-muted"> by @post.UserName</span>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    private List<PostDto>? posts;
+    private string titleFilter = "";
+    private string? error;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            error = null;
+            posts = await PostService.GetPostsAsync(titleFilter);
+        }
+        catch (Exception e)
+        {
+            error = e.Message;
+        }
+    }
+}

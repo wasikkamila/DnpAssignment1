@@ -11,8 +11,4 @@
       <ProjectReference Include="..\ApiContracts\ApiContracts.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Components\Pages\Posts\" />
-    </ItemGroup>
-
 </Project>
