@@ -1,0 +1,65 @@
+﻿@page "/users/create"
+@using ApiContracts
+@using BlazorApp.Services
+@inject IUserService UserService
+@inject NavigationManager NavMgr
+
+<PageTitle>Create user</PageTitle>
+
+<h3>Create a new user</h3>
+
+<div class="mb-2">
+    <label class="form-label">User name:</label>
+    <input class="form-control" type="text" @bind="userName"/>
+</div>
+<div class="mb-2">
+    <label class="form-label">Password:</label>
+    <input class="form-control" type="password" @bind="password"/>
+</div>
+
+@if (!string.IsNullOrEmpty(errorLabel))
+{
+    <p style="color: red">@errorLabel</p>
+}
+@if (!string.IsNullOrEmpty(successLabel))
+{
+    <p style="color: green">@successLabel</p>
+}
+
+<button class="btn btn-primary" @onclick="CreateAsync">Create user</button>
+
+@code {
+    private string userName = "";
+    private string password = "";
+    private string errorLabel = "";
+    private string successLabel = "";
+
+    private async Task CreateAsync()
+    {
+        errorLabel = "";
+        successLabel = "";
+
+        if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
+        {
+            errorLabel = "Please fill in both user name and password.";
+            return;
+        }
+
+        try
+        {
+            UserDto created = await UserService.AddUserAsync(new CreateUserDto
+            {
+                UserName = userName,
+                Password = password
+            });
+            successLabel = $"User '{created.UserName}' created with id {created.Id}. You can now log in.";
+            userName = "";
+            password = "";
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            errorLabel = $"Error: {e.Message}";
+        }
+    }
+}

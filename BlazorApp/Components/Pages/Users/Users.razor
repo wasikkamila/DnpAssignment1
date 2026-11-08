@@ -1,0 +1,63 @@
+﻿@page "/users"
+@using ApiContracts
+@using BlazorApp.Services
+@inject IUserService UserService
+
+<PageTitle>Users</PageTitle>
+
+<h3>Users</h3>
+
+<div class="input-group mb-3" style="max-width: 400px">
+    <input class="form-control" placeholder="Search user name..." @bind="searchText"/>
+    <button class="btn btn-outline-secondary" @onclick="LoadAsync">Search</button>
+</div>
+
+@if (!string.IsNullOrEmpty(errorLabel))
+{
+    <p style="color: red">@errorLabel</p>
+}
+else if (users == null)
+{
+    <p>Loading...</p>
+}
+else if (users.Count == 0)
+{
+    <p>No users found.</p>
+}
+else
+{
+    <table class="table" style="max-width: 400px">
+        <thead><tr><th>Id</th><th>User name</th></tr></thead>
+        <tbody>
+        @foreach (UserDto user in users)
+        {
+            <tr><td>@user.Id</td><td>@user.UserName</td></tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<UserDto>? users;
+    private string searchText = "";
+    private string errorLabel = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        errorLabel = "";
+        try
+        {
+            users = await UserService.GetUsersAsync(searchText);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            errorLabel = $"Error: {e.Message}";
+        }
+    }
+}

@@ -12,8 +12,6 @@
       <ProjectReference Include="..\Server\FileRepositories\FileRepositories.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Include="obj\UpdateCommentDto.cs" />
-    </ItemGroup>
+
 
 </Project>
