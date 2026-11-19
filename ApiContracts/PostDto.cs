@@ -9,4 +9,5 @@ public class PostDto
     public required string UserName { get; set; }
     
     public List<CommentDto>? Comments { get; set; }
+    public UserDto? Author { get; set; }
 }

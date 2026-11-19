@@ -2,6 +2,7 @@
 using Entities;
 using RepositoryContracts;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebAPI.Controllers;
 
@@ -32,7 +33,7 @@ public class PostsController : ControllerBase
             return BadRequest("Title and Body are required");
         }
         
-        User? author = FindUser(request.UserId);
+        User? author = await FindUserAsync(request.UserId);
         if (author == null)
         {
             return BadRequest($"User with id {request.UserId} not found");
@@ -45,7 +46,15 @@ public class PostsController : ControllerBase
             UserId = request.UserId,
         });
         
-        PostDto dto = ToDto(created, author.UserName);
+        PostDto dto = new()
+        {
+            Id = created.Id,
+            Title = created.Title,
+            Body = created.Body,
+            UserId = created.UserId,
+            UserName = author.UserName
+        };
+        
         return Created($"/posts/{dto.Id}", dto);
     }
 
@@ -53,7 +62,7 @@ public class PostsController : ControllerBase
     public async Task<ActionResult> UpdatePost([FromRoute] int postId,
         [FromBody] UpdatePost request)
     {
-        Post? post = FindPost(postId);
+        Post? post = await FindPostAsync(postId);
         if (post is null)
         {
             return NotFound($"Post with id {postId} not found");
@@ -72,37 +81,65 @@ public class PostsController : ControllerBase
     }
 
     [HttpGet("{postId:int}")]
-    public ActionResult<PostDto> GetPost([FromRoute] int postId,
+    public async Task<ActionResult<PostDto>> GetPost([FromRoute] int postId,
+        [FromQuery] bool includeAuthor = false,
         [FromQuery] bool includeComments = false)
     {
-        Post? post = FindPost(postId);
-        if (post is null)
-        {
-            return NotFound($"Post with id {postId} not found");
-        }
+        IQueryable<Post> queryForPost = postRepository.GetMany()
+            .Where(p => p.Id == postId);
 
-        Dictionary<int, string> userNames = UserNames();
-        PostDto dto = ToDto(post, NameOf(userNames, post.UserId));
+        if (includeAuthor)
+        {
+            queryForPost = queryForPost.Include(p => p.User);
+        }
 
         if (includeComments)
         {
-            dto.Comments = CommentsOfPost(postId, userNames);
+            queryForPost = queryForPost.Include(p => p.Comments);
+        }
+
+        PostDto? dto = await queryForPost.Select(post => new PostDto
+        {
+            Id = post.Id,
+            Title = post.Title,
+            Body = post.Body,
+            UserId = post.UserId,
+            UserName = post.User.UserName,
+            Author = includeAuthor
+                ? new UserDto
+                    { Id = post.User.Id, UserName = post.User.UserName }
+                : null,
+            Comments = includeComments
+                ? post.Comments.Select(c => new CommentDto()
+                {
+                    Id = c.Id,
+                    Body = c.Body,
+                    UserId = c.UserId,
+                    UserName = c.User.UserName,
+                    PostId = c.PostId
+                }).ToList()
+                : new List<CommentDto>()
+        }).FirstOrDefaultAsync();
+
+        if (dto is null)
+        {
+            return NotFound($"Post with id {postId} not found");
         }
 
         return dto;
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<PostDto>> GetPosts(
+    public async Task<ActionResult<IEnumerable<PostDto>>> GetPosts(
         [FromQuery] string? titleContains, [FromQuery] int? userId,
         [FromQuery] string? userName)
     {
-        Dictionary<int, string> userNames = UserNames();
         IQueryable<Post> posts = postRepository.GetMany();
 
         if (!string.IsNullOrEmpty(titleContains))
         {
-            posts = posts.Where(p => p.Title.Contains(titleContains, StringComparison.OrdinalIgnoreCase));
+            string lowerTitle = titleContains.ToLower();
+            posts = posts.Where(p => p.Title.ToLower().Contains(lowerTitle));
         }
 
         if (userId is not null)
@@ -112,39 +149,57 @@ public class PostsController : ControllerBase
 
         if (!string.IsNullOrEmpty(userName))
         {
-            List<int> matchingUserIds = userNames
-                .Where(value => value.Value.Contains(userName, StringComparison.OrdinalIgnoreCase))
-                .Select(value => value.Key).ToList();
-            posts = posts.Where(p => matchingUserIds.Contains(p.UserId));
+            string lowerName = userName.ToLower();
+            posts = posts.Where(p => p.User.UserName.ToLower().Contains(lowerName));
         }
 
-        return Ok(posts.ToList().Select(p => ToDto(p, NameOf(userNames, p.UserId))));
+        List<PostDto> result = await posts.Select(p => new PostDto
+        {
+            Id = p.Id,
+            Title = p.Title,
+            Body = p.Body,
+            UserId = p.UserId,
+            UserName = p.User.UserName
+        }).ToListAsync();
+
+        return Ok(result);
     }
 
     [HttpGet("{postId:int}/comments")]
-    public ActionResult<IEnumerable<CommentDto>> GetCommentsOfPost(
+    public async Task<ActionResult<IEnumerable<CommentDto>>> GetCommentsOfPost(
         [FromRoute] int postId)
     {
-        if (FindPost(postId) is null)
+        if (await FindPostAsync(postId) is null)
         {
             return NotFound($"Post with id {postId} not found");
         }
+        
+        List<CommentDto> comments = await commentRepository.GetMany()
+            .Where(c => c.PostId == postId)
+            .Select(c => new CommentDto
+            {
+                Id = c.Id,
+                Body = c.Body,
+                UserId = c.UserId,
+                UserName = c.User.UserName,
+                PostId = c.PostId
+            }).ToListAsync();
 
-        return Ok(CommentsOfPost(postId, UserNames()));
+        return Ok(comments);
     }
 
     [HttpDelete("{postId:int}")]
     public async Task<ActionResult> DeletePost([FromRoute] int postId)
     {
-        if (FindPost(postId) is null)
+        if (await FindPostAsync(postId) is null)
         {
             return NotFound($"Post with id {postId} not found");
         }
         
-        List<int> commentIds = commentRepository.GetMany()
+        List<int> commentIds = await commentRepository.GetMany()
             .Where(c => c.PostId == postId)
             .Select(c => c.Id)
-            .ToList();
+            .ToListAsync();
 
         foreach (int commentId in commentIds)
         {
@@ -155,32 +210,7 @@ public class PostsController : ControllerBase
         return NoContent();
     }
     
-    private Post? FindPost(int postId) => postRepository.GetMany().SingleOrDefault(p => p.Id == postId);
-    private User? FindUser(int userId) => userRepository.GetMany().SingleOrDefault(u => u.Id == userId);
-   
-    //id-to-name list
-    private Dictionary<int, string> UserNames() => userRepository.GetMany().ToDictionary(u => u.Id, u => u.UserName);
-    private static String NameOf(Dictionary<int, string> names, int userId) =>
-    names.TryGetValue(userId, out string? name) ? name : "Unknown";
+    private Task<Post?> FindPostAsync(int postId) => postRepository.GetMany().SingleOrDefaultAsync(p => p.Id == postId);
+    private Task<User?> FindUserAsync(int userId) => userRepository.GetMany().SingleOrDefaultAsync(u => u.Id == userId);
     
-    private List<CommentDto> CommentsOfPost(int postId, Dictionary<int, string> userNames) =>
-    commentRepository.GetMany()
-        .Where(c => c.PostId == postId)
-        .ToList()
-        .Select(c => new CommentDto
-        {
-            Id = c.Id,
-            Body = c.Body,
-            UserId = c.UserId,
-            UserName = NameOf(userNames, c.UserId),
-            PostId = c.PostId
-        }).ToList();
-    private static PostDto ToDto(Post post, string userName) => new()
-   {
-       Id = post.Id,
-       Title = post.Title,
-       Body = post.Body,
-       UserId = post.UserId,
-       UserName = userName
-   };
 }

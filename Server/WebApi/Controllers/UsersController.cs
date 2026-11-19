@@ -1,6 +1,7 @@
 ﻿using ApiContracts;
 using Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RepositoryContracts;
 
 namespace WebApi.Controllers;
@@ -21,7 +22,7 @@ public class UsersController(
             return BadRequest("UserName and Password are required.");
         }
 
-        if (IsUserNameTaken(request.UserName))
+        if (await IsUserNameTakenAsync(request.UserName))
         {
             return Conflict($"Username '{request.UserName}' is already in use.");
         }
@@ -40,7 +41,7 @@ public class UsersController(
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateUser([FromRoute] int id, [FromBody] UpdateUserDto request)
     {
-        User? user = FindUser(id);
+        User? user = await FindUserAsync(id);
         if (user is null)
         {
             return NotFound($"User with ID {id} not found.");
@@ -51,7 +52,7 @@ public class UsersController(
             return BadRequest("UserName and Password are required.");
         }
 
-        if (IsUserNameTaken(request.UserName, exceptUserId: id))
+        if (await IsUserNameTakenAsync(request.UserName, exceptUserId: id))
         {
             return Conflict($"Username '{request.UserName}' is already in use.");
         }
@@ -64,42 +65,51 @@ public class UsersController(
 
     // GET /users/{id}
     [HttpGet("{id:int}")]
-    public ActionResult<UserDto> GetSingleUser([FromRoute] int id)
+    public async Task<ActionResult<UserDto>> GetSingleUser([FromRoute] int id)
     {
-        User? user = FindUser(id);
+        User? user = await FindUserAsync(id);
         return user is null ? NotFound($"User with ID {id} not found.") : ToDto(user);
     }
 
     // GET /users?userName=abc
     [HttpGet]
-    public ActionResult<IEnumerable<UserDto>> GetUsers([FromQuery] string? userName)
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers([FromQuery] string? userName)
     {
         IQueryable<User> users = userRepo.GetMany();
 
         if (!string.IsNullOrWhiteSpace(userName))
         {
-            users = users.Where(u => u.UserName.Contains(userName, StringComparison.OrdinalIgnoreCase));
+            string lowerName = userName.ToLower();
+            users = users.Where(u => u.UserName.ToLower().Contains(lowerName));
         }
 
-        return Ok(users.ToList().Select(ToDto));
+        List<UserDto> result = await users
+            .Select(u => new UserDto { Id = u.Id, UserName = u.UserName })
+            .ToListAsync();
+
+        return Ok(result);
     }
 
     // DELETE /users/{id}
     // Also removes the user's posts and comments (and comments on those posts),
-    // so no orphaned data is left behind.
+    // so no data is left behind.
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteUser([FromRoute] int id)
     {
-        if (FindUser(id) is null)
+        if (await FindUserAsync(id) is null)
         {
             return NotFound($"User with ID {id} not found.");
         }
 
-        List<int> postIds = postRepo.GetMany().Where(p => p.UserId == id).Select(p => p.Id).ToList();
-        List<int> commentIds = commentRepo.GetMany()
+        List<int> postIds = await postRepo.GetMany()
+            .Where(p => p.UserId == id)
+            .Select(p => p.Id)
+            .ToListAsync();
+        
+        List<int> commentIds = await commentRepo.GetMany()
             .Where(c => c.UserId == id || postIds.Contains(c.PostId))
             .Select(c => c.Id)
-            .ToList();
+            .ToListAsync();
 
         foreach (int commentId in commentIds)
         {
@@ -115,12 +125,16 @@ public class UsersController(
         return NoContent();
     }
 
-    private User? FindUser(int id) => userRepo.GetMany().SingleOrDefault(u => u.Id == id);
+    private Task<User?> FindUserAsync(int id) =>
+        userRepo.GetMany().SingleOrDefaultAsync(u => u.Id == id);
 
-    private bool IsUserNameTaken(string userName, int? exceptUserId = null) =>
-        userRepo.GetMany().Any(u =>
+    private Task<bool> IsUserNameTakenAsync(string userName,
+        int? exceptUserId = null)
+    {
+        string lowerName = userName.ToLower();
+        return userRepo.GetMany().AnyAsync(u => 
             u.Id != exceptUserId &&
-            u.UserName.Equals(userName, StringComparison.OrdinalIgnoreCase));
-
+            u.UserName.ToLower() == lowerName);
+    }
     private static UserDto ToDto(User user) => new() { Id = user.Id, UserName = user.UserName };
 }
