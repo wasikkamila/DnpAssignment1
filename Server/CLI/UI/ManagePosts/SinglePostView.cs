@@ -75,7 +75,7 @@ public class SinglePostView
         Console.WriteLine("add comment:");
         string body = Console.ReadLine()??"";
         
-        Comment cCreated = await commentRepository.AddAsync(new Comment{Body = body, UserId = userId});
+        Comment cCreated = await commentRepository.AddAsync(new Comment(body, userId, postId));
         Console.WriteLine($"Comment added with ID: {cCreated.Id}");
     }
 }

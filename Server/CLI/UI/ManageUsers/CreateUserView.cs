@@ -33,7 +33,7 @@ public class CreateUserView
         Console.Write("Password: ");
         string password = Console.ReadLine() ?? "";
 
-        User created = await _userRepository.AddAsync(new User
+        User created = await _userRepository.AddAsync(new User(userName, password)
         {
             UserName = userName,
             Password = password

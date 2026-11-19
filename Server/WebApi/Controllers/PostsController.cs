@@ -38,7 +38,7 @@ public class PostsController : ControllerBase
             return BadRequest($"User with id {request.UserId} not found");
         }
 
-        Post created = await postRepository.AddAsync(new Post
+        Post created = await postRepository.AddAsync(new Post(request.Title, request.Body, request.UserId)
         {
             Title = request.Title,
             Body = request.Body,

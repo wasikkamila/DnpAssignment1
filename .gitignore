@@ -4,3 +4,7 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 app.db
+Server/WebApi/*.json
+!Server/WebApi/appsettings*.json
+!Server/WebApi/Properties/launchSettings.json
+.idea/**/dataSources*.xml

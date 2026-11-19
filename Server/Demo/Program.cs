@@ -8,7 +8,7 @@ Console.WriteLine("USERS:");
 IUserRepository userRepository = new UserFileRepository();
 PrintUsers(userRepository.GetMany());
 
-User addedUser = await userRepository.AddAsync(new User {UserName = "kamila", Password = "password"});
+User addedUser = await userRepository.AddAsync(new User("kamila", "password"));
 Console.WriteLine($"New user: Id: {addedUser.Id}, UserName: {addedUser.UserName}, Password: {addedUser.Password}");
 
 User fetchedUser = await userRepository.GetSingleAsync(addedUser.Id);
@@ -28,7 +28,7 @@ Console.WriteLine("POSTS:");
 IPostRepository postRepository = new PostFileRepository();
 PrintPosts(postRepository.GetMany());
 
-Post addedPost = await postRepository.AddAsync(new Post{ Title = "New post", Body = "Body text", UserId = 1 });
+Post addedPost = await postRepository.AddAsync(new Post("New post", "Body text", 1));
 Console.WriteLine($"New post: Id: {addedPost.Id}, Title: {addedPost.Title}");
 
 Post fetchedPost = await postRepository.GetSingleAsync(addedPost.Id);
@@ -48,7 +48,7 @@ Console.WriteLine("COMMENTS:");
 ICommentRepository commentRepository = new CommentFileRepository();
 PrintComments(commentRepository.GetMany());
 
-Comment addedComment = await commentRepository.AddAsync(new Comment{Body = "new comment", UserId = 1, PostId = 1});
+Comment addedComment = await commentRepository.AddAsync(new Comment("new comment", 1, 1));
 Console.WriteLine($"new comment: Id: {addedComment.Id}, Body: {addedComment.Body}");
 
 Comment fetchedComment = await commentRepository.GetSingleAsync(addedComment.Id);

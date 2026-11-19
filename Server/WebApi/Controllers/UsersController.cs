@@ -26,7 +26,7 @@ public class UsersController(
             return Conflict($"Username '{request.UserName}' is already in use.");
         }
 
-        User created = await userRepo.AddAsync(new User
+        User created = await userRepo.AddAsync(new User(request.UserName, request.Password)
         {
             UserName = request.UserName,
             Password = request.Password

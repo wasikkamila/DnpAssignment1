@@ -38,7 +38,7 @@ public class CreatePostView
             return;
         }
         
-        Post pCreated = await postRepository.AddAsync(new Post {Title = title, Body = body, UserId = userId});
+        Post pCreated = await postRepository.AddAsync(new Post(title, body, userId));
 
         Console.WriteLine($"New post: '{pCreated.Title}' created with id: {pCreated.Id}");
     }

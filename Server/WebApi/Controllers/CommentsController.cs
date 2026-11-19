@@ -32,7 +32,7 @@ public class CommentsController(
             return BadRequest($"Post with ID {request.PostId} does not exist.");
         }
 
-        Comment created = await commentRepo.AddAsync(new Comment
+        Comment created = await commentRepo.AddAsync(new Comment(request.Body, request.UserId, request.PostId)
         {
             Body = request.Body,
             UserId = request.UserId,
